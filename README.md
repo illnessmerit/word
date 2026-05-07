@@ -75,13 +75,13 @@
    }
    ```
 
-1. Copy an API key from [the Cerebras website](https://cloud.cerebras.ai).
+1. Copy an API key from [the Groq website](https://console.groq.com).
 
 1. Run the following commands:
 
    ```bash
    mkdir -p ~/.config/word/
-   pbpaste > ~/.config/word/cerebras
+   pbpaste > ~/.config/word/groq
    brew install node
    npm install -g neovim
    nvim --headless +UpdateRemotePlugins +qa!
