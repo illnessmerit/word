@@ -122,6 +122,19 @@
 (def model
   "openai/gpt-oss-120b")
 
+(def response-format
+  {:json_schema {:name "word"
+                 :schema {:additionalProperties false
+                          :properties {:explanation {:type "string"}
+                                       :suggestions {:items {:type "string"}
+                                                     :maxItems 2
+                                                     :minItems 2
+                                                     :type "array"}}
+                          :required ["explanation" "suggestions"]
+                          :type "object"}
+                 :strict true}
+   :type "json_schema"})
+
 (defn generate-completion
   [sentences]
   (promesa/let [prompt (get-prompt)
@@ -130,7 +143,8 @@
                                                                               :content prompt}
                                                                              {:role "user"
                                                                               :content context}]
-                                                                  :model model}))]
+                                                                  :model model
+                                                                  :response_format response-format}))]
     (-> response
         (js->clj :keywordize-keys true)
         :choices
