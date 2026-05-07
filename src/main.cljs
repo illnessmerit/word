@@ -88,7 +88,7 @@
 (def create-context*
   (comp str
         (partial map (comp (partial setval* [MAP-VALS (pred= "")] NONE)
-                           (partial zipmap [:previous :target :next])))
+                           (partial zipmap [:previous-sentence :target-sentence :next-sentence])))
         (partial partition 3 1)))
 
 (defn create-context
