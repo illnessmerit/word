@@ -7,7 +7,7 @@
 
 (def api-key
   (-> (homedir)
-      (join ".config/word/cerebras")
+      (join ".config/word/groq")
       slurp))
 
 (defonce state
