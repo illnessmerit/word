@@ -22,6 +22,24 @@ The goal is under 1.0 second.
 
 The goal is under $1 a month. That's over 10x cheaper than [Grammarly Pro](https://www.grammarly.com/plans#:~:text=%2412,USD).
 
+## Model
+
+> What model does `word` use?
+
+`word` uses the `gpt-oss-120b` model.
+
+I went through the most popular models on OpenRouter in order of popularity. My goal was to find something that could actually crank out at least 100 theoretical tokens in that very first second. I used this formula for theoretical tokens in the first second:
+
+$$(1.0s - \text{latency}) \times \text{throughput}$$
+
+`gpt-oss-120b` was the first one that cleared that bar. I chose Groq as the provider over Cerebras because:
+
+- Groq had lower latency than Cerebras.
+
+- It looked like Cerebras locked this model behind a paywall. I kept hitting 404 errors. Groq let me use this model without those hoops.
+
+The other providers of `gpt-oss-120b` had higher latency and lower throughput than Groq.
+
 ## Suggestion
 
 > Can `⌘ + f` generate suggestions if your cursor is not inside a sentence?
