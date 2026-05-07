@@ -106,7 +106,12 @@
 (defn get-styles
   []
   (promesa/let [styles (.lua (:nvim @state) "return require('word').config.styles")]
-    (js->clj styles)))
+    (js->clj styles :keywordize-keys true)))
+
+(defn get-prompt
+  []
+  (promesa/let [styles (get-styles)]
+    (:prompt (nth styles (:index @state)))))
 
 (defn suggest
   []
@@ -120,6 +125,7 @@
   [plugin]
   (promesa/let [namespace (.createNamespace (.-nvim plugin) "word")]
     (reset! state {:nvim (.-nvim plugin)
-                   :namespace namespace}))
+                   :namespace namespace
+                   :index 0}))
   (.registerFunction plugin "Style" style)
   (.registerFunction plugin "Suggest" suggest))
