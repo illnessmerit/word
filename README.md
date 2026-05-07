@@ -35,22 +35,43 @@
 
    ```lua
    {
-     "8ta4/word",
-     build = "./install.sh",
-     dependencies = {
-       "8ta4/sentence",
-       build = "./install.sh",
-     },
-     keys = {
-       { "<M-f>", function() require('word').suggest() end, mode = {"n", "i", "v"} },
-       { "<M-j>", function() require('word').apply(2) end, mode = {"n", "i", "v"} },
-       { "<M-k>", function() require('word').apply(1) end, mode = {"n", "i", "v"} },
-     },
-     opts = {
-       styles = {
-         { name = "casual", prompt = "Use a casual tone. Use correct grammar. Check if the sentence meets these requirements. Explain any failures. Give two rewrites of the sentence. Do not rewrite the context." },
-       },
-     },
+   	"8ta4/word",
+   	build = "./install.sh",
+   	dependencies = {
+   		"8ta4/sentence",
+   		build = "./install.sh",
+   	},
+   	keys = {
+   		{
+   			"<M-f>",
+   			function()
+   				require("word").suggest()
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   		{
+   			"<M-j>",
+   			function()
+   				require("word").apply(2)
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   		{
+   			"<M-k>",
+   			function()
+   				require("word").apply(1)
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   	},
+   	opts = {
+   		styles = {
+   			{
+   				name = "casual",
+   				prompt = "Use a casual tone. Use correct grammar. Check if the sentence meets these requirements. Explain any failures. Give two rewrites of the sentence. Do not rewrite the context.",
+   			},
+   		},
+   	},
    }
    ```
 
@@ -111,25 +132,55 @@ Yes.
    local base = " Use correct grammar. Check if the sentence meets these requirements. Explain any failures. Give two rewrites of the sentence. Do not rewrite the context."
 
    {
-     "8ta4/word",
-     build = "./install.sh",
-     dependencies = {
-       "8ta4/sentence",
-       build = "./install.sh",
-     },
-     keys = {
-       { "<M-1>", function() require('word').style(1) end, mode = {"n", "i", "v"} },
-       { "<M-2>", function() require('word').style(2) end, mode = {"n", "i", "v"} },
-       { "<M-f>", function() require('word').suggest() end, mode = {"n", "i", "v"} },
-       { "<M-j>", function() require('word').apply(2) end, mode = {"n", "i", "v"} },
-       { "<M-k>", function() require('word').apply(1) end, mode = {"n", "i", "v"} },
-     },
-     opts = {
-       styles = {
-         { name = "casual", prompt = "Use a casual tone." .. base },
-         { name = "formal", prompt = "Use a formal tone." .. base },
-       },
-     },
+   	"8ta4/word",
+   	build = "./install.sh",
+   	dependencies = {
+   		"8ta4/sentence",
+   		build = "./install.sh",
+   	},
+   	keys = {
+   		{
+   			"<M-1>",
+   			function()
+   				require("word").style(1)
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   		{
+   			"<M-2>",
+   			function()
+   				require("word").style(2)
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   		{
+   			"<M-f>",
+   			function()
+   				require("word").suggest()
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   		{
+   			"<M-j>",
+   			function()
+   				require("word").apply(2)
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   		{
+   			"<M-k>",
+   			function()
+   				require("word").apply(1)
+   			end,
+   			mode = { "n", "i", "v" },
+   		},
+   	},
+   	opts = {
+   		styles = {
+   			{ name = "casual", prompt = "Use a casual tone." .. base },
+   			{ name = "formal", prompt = "Use a formal tone." .. base },
+   		},
+   	},
    }
    ```
 
