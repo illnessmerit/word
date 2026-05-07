@@ -24,8 +24,9 @@
                positions))))
 
 (defn get-sentences
-  [start-pos end-pos]
-  (promesa/let [start-sentence (.callFunction (:nvim @state) "Get" (clj->js {:pos start-pos}))]
+  []
+  (promesa/let [[start-pos end-pos] (get-selection-bounds)
+                start-sentence (.callFunction (:nvim @state) "Get" (clj->js {:pos start-pos}))]
     (if (js->clj start-sentence)
       (promesa/let [end-sentence* (.callFunction (:nvim @state) "Get" (clj->js {:pos end-pos}))
                     end-sentence (if (js->clj end-sentence*)
@@ -115,8 +116,7 @@
 
 (defn suggest
   []
-  (promesa/let [bounds (get-selection-bounds)
-                sentences (apply get-sentences bounds)]
+  (promesa/let [sentences (get-sentences)]
     (when-not (empty? sentences)
       (promesa/let [range-marks (set-range-extmarks sentences)
                     sentence-marks (set-sentence-extmarks sentences)]))))
