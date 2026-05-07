@@ -124,8 +124,11 @@
 
 (defn generate-completion
   [sentences]
-  (promesa/let [context (create-context sentences)
-                response (.chat.completions.create groq (clj->js {:messages [{:role "user"
+  (promesa/let [prompt (get-prompt)
+                context (create-context sentences)
+                response (.chat.completions.create groq (clj->js {:messages [{:role "system"
+                                                                              :content prompt}
+                                                                             {:role "user"
                                                                               :content context}]
                                                                   :model model}))]
     (-> response
