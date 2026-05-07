@@ -1,14 +1,10 @@
 (ns main
   (:require [cljs-node-io.core :refer [slurp]]
             [com.rpl.specter :refer [AFTER-ELEM MAP-VALS NONE pred= setval setval*]]
+            [groq-sdk :refer [Groq]]
             [os :refer [homedir]]
             [path :refer [join]]
             [promesa.core :as promesa :refer [all]]))
-
-(def api-key
-  (-> (homedir)
-      (join ".config/word/groq")
-      slurp))
 
 (defonce state
   (atom {}))
@@ -113,6 +109,14 @@
   []
   (promesa/let [styles (get-styles)]
     (:prompt (nth styles (:index @state)))))
+
+(def api-key
+  (-> (homedir)
+      (join ".config/word/groq")
+      slurp))
+
+(def groq
+  (Groq. (clj->js {:apiKey api-key})))
 
 (defn suggest
   []

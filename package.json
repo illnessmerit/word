@@ -4,5 +4,8 @@
   "private": true,
   "devDependencies": {
     "shadow-cljs": "3.4.6"
+  },
+  "dependencies": {
+    "groq-sdk": "^1.1.2"
   }
 }
