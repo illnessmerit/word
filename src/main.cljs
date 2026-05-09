@@ -127,6 +127,9 @@
                  :schema {:additionalProperties false
                           :properties {:explanation {:type "string"}
                                        :suggestions {:items {:type "string"}
+                                                     ;; https://console.groq.com/docs/structured-outputs
+                                                     ;; maxItems and minItems are not explicitly documented in Groq's Structured Outputs guide.
+                                                     ;; But they appear to be supported.
                                                      :maxItems 2
                                                      :minItems 2
                                                      :type "array"}}
