@@ -173,7 +173,10 @@
         :choices
         first
         :message
-        :content)))
+        :content
+        js/JSON.parse
+        (js->clj :keywordize-keys true)
+        :word)))
 
 (defn suggest
   []
