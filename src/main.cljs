@@ -122,28 +122,36 @@
 (def model
   "openai/gpt-oss-120b")
 
-(def properties
-  {:explanation {:type "string"}
-   :pass {:type "boolean"}
-   :suggestions {:items {:type "string"
-                         ;; https://console.groq.com/docs/structured-outputs
-                         ;; maxLength and minLength are not explicitly documented in Groq's Structured Outputs guide.
-                         ;; But they appear to be supported.
-                         :maxLength 100
-                         :minLength 1}
-                 ;; https://console.groq.com/docs/structured-outputs
-                 ;; maxItems and minItems are not explicitly documented in Groq's Structured Outputs guide.
-                 ;; But they appear to be supported.
-                 :maxItems 2
-                 :minItems 2
-                 :type "array"}})
+(def suggestions
+  {:items {:type "string"
+           ;; https://console.groq.com/docs/structured-outputs
+           ;; maxLength and minLength are not explicitly documented in Groq's Structured Outputs guide.
+           ;; But they appear to be supported.
+           :maxLength 100
+           :minLength 1}
+   ;; https://console.groq.com/docs/structured-outputs
+   ;; maxItems and minItems are not explicitly documented in Groq's Structured Outputs guide.
+   ;; But they appear to be supported.
+   :maxItems 2
+   :minItems 2
+   :type "array"})
+
+(defn wrap-schema
+  [properties]
+  {:additionalProperties false
+   :properties properties
+   :required (keys properties)
+   :type "object"})
 
 (def response-format
   {:json_schema {:name "word"
-                 :schema {:additionalProperties false
-                          :properties properties
-                          :required (keys properties)
-                          :type "object"}
+                 :schema (wrap-schema {:word {:anyOf (map wrap-schema [{:pass {:enum [true]
+                                                                               :type "boolean"}
+                                                                        :suggestions suggestions}
+                                                                       {:explanation {:type "string"}
+                                                                        :pass {:enum [false]
+                                                                               :type "boolean"}
+                                                                        :suggestions suggestions}])}})
                  :strict true}
    :type "json_schema"})
 
