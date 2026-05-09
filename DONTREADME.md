@@ -90,9 +90,11 @@ Sometimes you might intentionally write a messy draft to get suggestions. In tho
 
 I could've designed the tool with a keybinding to request suggestions without an explanation. But choosing between two shortcuts would increase cognitive load.
 
-> Can `word` provide an explanation if the sentence meets the requirements?
+> Does `word` explain why a sentence meets the requirements?
 
-Yes. This is handy for those times you're intentionally breaking a grammar rule for a specific vibe. The explanation confirms that your choice meets the requirements.
+No. Sometimes you're making a specific style choice. You might want to confirm the sentence meets the requirements even if it looks like a mistake on paper. That's an edge case.
+
+If you find yourself in that spot, you can hop into a standard LLM chat to provide more context and engage in a back-and-forth discussion.
 
 > Does `word` provide suggestions if a sentence already meets the requirements?
 
