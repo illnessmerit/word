@@ -18,8 +18,6 @@
 
 1. Make sure you're using [`lazy.nvim`](https://github.com/folke/lazy.nvim).
 
-1. Open a terminal.
-
 1. Merge these bindings into your Alacritty configuration:
 
    ```toml
@@ -76,6 +74,8 @@
    ```
 
 1. Copy an API key from [the Groq website](https://console.groq.com).
+
+1. Open a terminal.
 
 1. Run the following commands:
 
