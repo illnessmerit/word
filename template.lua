@@ -5,7 +5,7 @@ return {
 		styles = {
 			{
 				name = "casual",
-				prompt = "Use a casual tone. Use correct grammar. Check if the sentence meets these requirements. If the sentence fails or if it seems to fail but actually passes, explain why. Give two rewrites of the sentence.",
+				prompt = "Use a casual tone. Use correct grammar. Check if the sentence meets these requirements. Explain any failures. Give two rewrites of the sentence.",
 			},
 		},
 	},
