@@ -74,7 +74,7 @@ Highlighting the sentence allows you to scan for issues across multiple sentence
 
 ## Displaying
 
-> Can the content of the HUDHeads-Up Display (HUD) change while you are in Insert mode?
+> Can the content of the Heads-Up Display (HUD) change while you are in Insert mode?
 
 Yes. If an asynchronous request from a command like `⌘ + f` finishes while you're typing, the HUD will update with those fresh suggestions. But the display stays anchored to the specific `extmark` you were on when you entered Insert mode. This lets you use the suggestions as a reference while you're editing the sentence. The HUD won't switch its focus to a different `extmark` just because you moved your cursor in Insert mode.
 
