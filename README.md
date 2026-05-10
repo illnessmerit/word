@@ -45,21 +45,21 @@
    			function()
    				require("word").suggest()
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "i", "n", "x" },
    		},
    		{
    			"<M-j>",
    			function()
    				require("word").apply(2)
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "n", "x" },
    		},
    		{
    			"<M-k>",
    			function()
    				require("word").apply(1)
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "n", "x" },
    		},
    	},
    	opts = {
@@ -140,35 +140,35 @@ Yes.
    			function()
    				require("word").style(1)
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "i", "n", "x" },
    		},
    		{
    			"<M-2>",
    			function()
    				require("word").style(2)
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "i", "n", "x" },
    		},
    		{
    			"<M-f>",
    			function()
    				require("word").suggest()
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "i", "n", "x" },
    		},
    		{
    			"<M-j>",
    			function()
    				require("word").apply(2)
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "n", "x" },
    		},
    		{
    			"<M-k>",
    			function()
    				require("word").apply(1)
    			end,
-   			mode = { "n", "i", "v" },
+   			mode = { "n", "x" },
    		},
    	},
    	opts = {
