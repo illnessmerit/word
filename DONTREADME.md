@@ -114,12 +114,6 @@ No. `word` does not use the sentence's text as a cache key. Instead, it uses a N
 
 No. After you apply a suggestion, the cache persists. This makes sure all the options you generated for that specific sentence stay available even after the text changes.
 
-> Can editing one sentence delete the suggestions for another sentence?
-
-Yes. If your edits merge multiple sentences into one, the suggestions for all merged sentences get cleared.
-
-When an edit modifies text linked to an `extmark`, the plugin recalculates the grammatical boundaries starting from the start and end positions of that `extmark`. If those boundaries have expanded to overlap with other `extmarks`, the plugin wipes those suggestions from the cache. This keeps `word` from showing you stale data that was generated for the individual sentences before they were merged.
-
 > Will I see my previous suggestions if I reopen a file?
 
 No. The cache lives and dies with your editing session. Persistent caching would be unreliable if you:
