@@ -52,14 +52,14 @@
    			function()
    				require("word").apply(2)
    			end,
-   			mode = { "n", "x" },
+   			mode = { "i", "n", "x" },
    		},
    		{
    			"<M-k>",
    			function()
    				require("word").apply(1)
    			end,
-   			mode = { "n", "x" },
+   			mode = { "i", "n", "x" },
    		},
    	},
    	opts = {
@@ -161,14 +161,14 @@ Yes.
    			function()
    				require("word").apply(2)
    			end,
-   			mode = { "n", "x" },
+   			mode = { "i", "n", "x" },
    		},
    		{
    			"<M-k>",
    			function()
    				require("word").apply(1)
    			end,
-   			mode = { "n", "x" },
+   			mode = { "i", "n", "x" },
    		},
    	},
    	opts = {
