@@ -85,21 +85,21 @@
                                                                             :pos [(first (last sentences)) (llast sentences)]}))]
     (setval AFTER-ELEM (or (js->clj next-sentence) [(first (last sentences)) (llast sentences) (llast sentences)]) sentences)))
 
-(def create-context*
-  (comp str
-        (partial map (comp (partial setval* [MAP-VALS (pred= "")] NONE)
+(def get-contexts*
+  (comp (partial map (comp str
+                           (partial setval* [MAP-VALS (pred= "")] NONE)
                            (partial zipmap [:previous-sentence :target-sentence :next-sentence])))
         (partial partition 3 1)))
 
-(defn create-context
+(defn get-contexts
   [sentences]
   (promesa/let [sentences* (prepend sentences)
                 sentences* (append sentences*)
                 lines (.buffer.getLines (:nvim @state) (clj->js {:start (ffirst sentences*)
                                                                  :end (inc (first (last sentences*)))}))]
-    (create-context* (map (fn [[row start-col end-col]]
-                            (subs (nth (js->clj lines) (- row (ffirst sentences*))) start-col end-col))
-                          sentences*))))
+    (get-contexts* (map (fn [[row start-col end-col]]
+                          (subs (nth (js->clj lines) (- row (ffirst sentences*))) start-col end-col))
+                        sentences*))))
 
 (defn get-styles
   []
@@ -158,25 +158,28 @@
                  :strict true}
    :type "json_schema"})
 
-(defn generate-completion
+(def parse-response
+  (comp :word
+        #(js->clj % :keywordize-keys true)
+        js/JSON.parse
+        :content
+        :message
+        first
+        :choices
+        #(js->clj % :keywordize-keys true)))
+
+(defn request-analysis
   [sentences]
   (promesa/let [prompt (get-prompt)
-                context (create-context sentences)
-                response (.chat.completions.create groq (clj->js {:messages [{:role "system"
-                                                                              :content prompt}
-                                                                             {:role "user"
-                                                                              :content context}]
-                                                                  :model model
-                                                                  :response_format response-format}))]
-    (-> response
-        (js->clj :keywordize-keys true)
-        :choices
-        first
-        :message
-        :content
-        js/JSON.parse
-        (js->clj :keywordize-keys true)
-        :word)))
+                context (get-contexts sentences)
+                responses (all (map #(.chat.completions.create groq (clj->js {:messages [{:role "system"
+                                                                                          :content prompt}
+                                                                                         {:role "user"
+                                                                                          :content %}]
+                                                                              :model model
+                                                                              :response_format response-format}))
+                                    context))]
+    (map parse-response responses)))
 
 (defn suggest
   []
@@ -184,7 +187,7 @@
     (when-not (empty? sentences)
       (promesa/let [range-marks (set-range-extmarks sentences)
                     sentence-marks (set-sentence-extmarks sentences)
-                    completion (generate-completion sentences)]))))
+                    analyses (request-analysis sentences)]))))
 
 (defn main
   [plugin]
