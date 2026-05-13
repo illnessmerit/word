@@ -173,7 +173,7 @@
         :choices
         #(js->clj % :keywordize-keys true)))
 
-(defn get-range-marks*
+(defn get-range-extmarks*
   [[start end]]
   (.request (:nvim @state) "nvim_buf_get_extmarks" (clj->js [0
                                                              (:range-namespace @state)
@@ -181,17 +181,17 @@
                                                              end
                                                              {:overlap true}])))
 
-(def get-range-marks
-  (comp all (partial map get-range-marks*)))
+(def get-range-extmarks
+  (comp all (partial map get-range-extmarks*)))
 
 (defn suggest
   []
   (promesa/let [sentences (get-sentences)]
     (when-not (empty? sentences)
       (promesa/let [range-bounds (get-range-bounds sentences)
-                    overlapping-range-marks (get-range-marks range-bounds)
-                    initialized-range-marks (set-range-extmarks range-bounds)
-                    sentence-marks (set-sentence-extmarks sentences)
+                    overlapping-range-extmarks (get-range-extmarks range-bounds)
+                    initialized-range-extmarks (set-range-extmarks range-bounds)
+                    sentence-extmarks (set-sentence-extmarks sentences)
                     prompt (get-prompt)
                     contexts (get-contexts sentences)]
         (run! #(promesa/let [response (.chat.completions.create groq (clj->js {:messages [{:role "system"
