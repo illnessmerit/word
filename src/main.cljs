@@ -67,6 +67,17 @@
   (promesa/let [sentences* (prepend sentences)]
     (all (transform [ALL ALL] (juxt first last) (partition 2 1 sentences*)))))
 
+(defn get-range-extmarks*
+  [[start end]]
+  (.request (:nvim @state) "nvim_buf_get_extmarks" (clj->js [0
+                                                             (:range-namespace @state)
+                                                             start
+                                                             end
+                                                             {:overlap true}])))
+
+(def get-range-extmarks
+  (comp all (partial map get-range-extmarks*)))
+
 (defn set-range-extmark
   [[start end]]
   (.request (:nvim @state) "nvim_buf_set_extmark" (clj->js [0
@@ -171,17 +182,6 @@
         first
         :choices
         #(js->clj % :keywordize-keys true)))
-
-(defn get-range-extmarks*
-  [[start end]]
-  (.request (:nvim @state) "nvim_buf_get_extmarks" (clj->js [0
-                                                             (:range-namespace @state)
-                                                             start
-                                                             end
-                                                             {:overlap true}])))
-
-(def get-range-extmarks
-  (comp all (partial map get-range-extmarks*)))
 
 (defn suggest
   []
