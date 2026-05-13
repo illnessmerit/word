@@ -1,6 +1,7 @@
 (ns main
   (:require [cljs-node-io.core :refer [slurp]]
             [com.rpl.specter :refer [AFTER-ELEM MAP-VALS NONE pred= setval setval*]]
+            [cljs.core.async :refer [chan]]
             [groq-sdk :refer [Groq]]
             [os :refer [homedir]]
             [path :refer [join]]
@@ -195,5 +196,5 @@
     (reset! state {:nvim (.-nvim plugin)
                    :namespace namespace
                    :index 0}))
-  (.registerFunction plugin "Style" style)
-  (.registerFunction plugin "Suggest" suggest))
+  (.registerFunction plugin "Style" style (clj->js {:sync true}))
+  (.registerFunction plugin "Suggest" suggest (clj->js {:sync true})))
