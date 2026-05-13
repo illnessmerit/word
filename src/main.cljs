@@ -168,7 +168,7 @@
         :choices
         #(js->clj % :keywordize-keys true)))
 
-(defn request-analysis
+(defn get-analyses
   [sentences]
   (promesa/let [prompt (get-prompt)
                 context (get-contexts sentences)
@@ -187,7 +187,7 @@
     (when-not (empty? sentences)
       (promesa/let [range-marks (set-range-extmarks sentences)
                     sentence-marks (set-sentence-extmarks sentences)
-                    analyses (request-analysis sentences)]))))
+                    analyses (get-analyses sentences)]))))
 
 (defn main
   [plugin]
