@@ -1,7 +1,6 @@
 (ns main
   (:require [cljs-node-io.core :refer [slurp]]
             [com.rpl.specter :refer [AFTER-ELEM ALL MAP-VALS NONE pred= setval setval* transform]]
-            [cljs.core.async :refer [chan]]
             [groq-sdk :refer [Groq]]
             [os :refer [homedir]]
             [path :refer [join]]
