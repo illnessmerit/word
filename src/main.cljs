@@ -86,9 +86,13 @@
 
 (defn append
   [sentences]
-  (promesa/let [next-sentence (.callFunction (:nvim @state) "Get" (clj->js {:offset 1
-                                                                            :pos [(first (last sentences)) (llast sentences)]}))]
-    (setval AFTER-ELEM (or (js->clj next-sentence) [(first (last sentences)) (llast sentences) (llast sentences)]) sentences)))
+  (promesa/let [next-sentence (.callFunction (:nvim @state)
+                                             "Get"
+                                             (clj->js {:offset 1
+                                                       :pos [(first (last sentences)) (llast sentences)]}))]
+    (setval AFTER-ELEM
+            (or (js->clj next-sentence) [(first (last sentences)) (llast sentences) (llast sentences)])
+            sentences)))
 
 (def get-contexts*
   (comp (partial map (comp str
@@ -185,12 +189,13 @@
                     extmarks (set-range-extmarks sentences)]
         (set-sentence-extmarks sentences)
         (dorun (map (fn [context extmark]
-                      (promesa/let [response (.chat.completions.create groq (clj->js {:messages [{:role "system"
-                                                                                                  :content prompt}
-                                                                                                 {:role "user"
-                                                                                                  :content context}]
-                                                                                      :model model
-                                                                                      :response_format response-format}))]
+                      (promesa/let [response (.chat.completions.create groq
+                                                                       (clj->js {:messages [{:role "system"
+                                                                                             :content prompt}
+                                                                                            {:role "user"
+                                                                                             :content context}]
+                                                                                 :model model
+                                                                                 :response_format response-format}))]
                         (->> response
                              parse-response
                              (setval :extmark extmark)
