@@ -57,7 +57,7 @@
   [[previous-sentence target-sentence]]
   (request "nvim_buf_set_extmark"
            0
-           (:range-namespace @state)
+           (:pending-range-namespace @state)
            (first previous-sentence)
            (last previous-sentence)
            {:end_col (last target-sentence)
@@ -72,7 +72,7 @@
   [[row start-col end-col]]
   (request "nvim_buf_set_extmark"
            0
-           (:sentence-namespace @state)
+           (:pending-sentence-namespace @state)
            row
            start-col
            {:end_col end-col
@@ -183,23 +183,39 @@
   [payload]
   (promesa/let [range-extmark (request "nvim_buf_get_extmark_by_id"
                                        (:buffer payload)
-                                       (:range-namespace @state)
+                                       (:pending-range-namespace @state)
                                        (:extmark payload)
                                        {:details true})]
     (when-not (empty? range-extmark)
       (promesa/let [sentence-extmark (request "nvim_buf_get_extmark_by_id"
                                               (:buffer payload)
-                                              (:sentence-namespace @state)
+                                              (:pending-sentence-namespace @state)
                                               (:extmark payload)
                                               {:details true})
                     overlapping-extmarks (request "nvim_buf_get_extmarks"
                                                   (:buffer payload)
-                                                  (:range-namespace @state)
+                                                  (:pending-range-namespace @state)
                                                   (take 2 range-extmark)
                                                   ((juxt :end_row :end_col) (last range-extmark))
                                                   {:overlap true})]
+        (request "nvim_buf_set_extmark"
+                 0
+                 (:resolved-sentence-namespace @state)
+                 (first sentence-extmark)
+                 (second sentence-extmark)
+                 (setval :hl_group
+                         (if (:pass payload)
+                           "DiagnosticUnderlineHint"
+                           "DiagnosticUnderlineError")
+                         (select-keys (last sentence-extmark) #{:end_row :end_col})))
+        (request "nvim_buf_set_extmark"
+                 0
+                 (:resolved-range-namespace @state)
+                 (first range-extmark)
+                 (second range-extmark)
+                 (select-keys (last range-extmark) #{:end_row :end_col}))
         (all (mapcat (comp (apply juxt (map #(partial request "nvim_buf_del_extmark" (:buffer payload) %)
-                                            ((juxt :range-namespace :sentence-namespace) @state)))
+                                            ((juxt :pending-range-namespace :pending-sentence-namespace) @state)))
                            first)
                      overlapping-extmarks))))))
 
@@ -236,12 +252,16 @@
 
 (defn main
   [plugin]
-  (promesa/let [range-namespace (.createNamespace (.-nvim plugin) "range")
-                sentence-namespace (.createNamespace (.-nvim plugin) "sentence")]
+  (promesa/let [pending-range-namespace (.createNamespace (.-nvim plugin) "pending-range")
+                pending-sentence-namespace (.createNamespace (.-nvim plugin) "pending-sentence")
+                resolved-range-namespace (.createNamespace (.-nvim plugin) "resolved-range")
+                resolved-sentence-namespace (.createNamespace (.-nvim plugin) "resolved-sentence")]
     (reset! state {:index 0
                    :nvim (.-nvim plugin)
-                   :range-namespace range-namespace
-                   :sentence-namespace sentence-namespace}))
+                   :pending-range-namespace pending-range-namespace
+                   :pending-sentence-namespace pending-sentence-namespace
+                   :resolved-range-namespace  resolved-range-namespace
+                   :resolved-sentence-namespace resolved-sentence-namespace}))
   (.registerFunction plugin "Style" style (clj->js {:sync true}))
   (.registerFunction plugin "Suggest" suggest (clj->js {:sync true}))
   (.registerFunction plugin "Handle" handle (clj->js {:sync true})))
