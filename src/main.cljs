@@ -66,7 +66,8 @@
   (.then promise #(js->clj % :keywordize-keys true)))
 
 (def get-range-extmarks
-  (comp parse-promise
+  (comp #(.then % (partial map set))
+        parse-promise
         all
         (partial map get-range-extmarks*)))
 
