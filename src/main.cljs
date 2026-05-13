@@ -179,10 +179,16 @@
 
 (defn handle*
   [payload]
-  (.request (:nvim @state) "nvim_buf_get_extmark_by_id" (clj->js [(:buffer payload)
-                                                                  (:range-namespace @state)
-                                                                  (:extmark payload)
-                                                                  {:details true}])))
+  (promesa/let [extmark (.request (:nvim @state) "nvim_buf_get_extmark_by_id" (clj->js [(:buffer payload)
+                                                                                        (:range-namespace @state)
+                                                                                        (:extmark payload)
+                                                                                        {:details true}]))]
+    (when-not (empty? (js->clj extmark :keywordize-keys true))
+      (.request (:nvim @state) "nvim_buf_get_extmarks" (clj->js [(:buffer payload)
+                                                                 (:range-namespace @state)
+                                                                 (take 2 (js->clj extmark :keywordize-keys true))
+                                                                 ((juxt :end_row :end_col) (last (js->clj extmark :keywordize-keys true)))
+                                                                 {:overlap true}])))))
 
 (def handle
   (comp handle*
