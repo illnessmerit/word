@@ -169,26 +169,22 @@
         :choices
         #(js->clj % :keywordize-keys true)))
 
-(defn get-analyses
-  [sentences]
-  (promesa/let [prompt (get-prompt)
-                contexts (get-contexts sentences)
-                responses (all (map #(.chat.completions.create groq (clj->js {:messages [{:role "system"
-                                                                                          :content prompt}
-                                                                                         {:role "user"
-                                                                                          :content %}]
-                                                                              :model model
-                                                                              :response_format response-format}))
-                                    contexts))]
-    (map parse-response responses)))
-
 (defn suggest
   []
   (promesa/let [sentences (get-sentences)]
     (when-not (empty? sentences)
       (promesa/let [range-marks (set-range-extmarks sentences)
                     sentence-marks (set-sentence-extmarks sentences)
-                    analyses (get-analyses sentences)]))))
+                    prompt (get-prompt)
+                    contexts (get-contexts sentences)]
+        (run! #(promesa/let [response (.chat.completions.create groq (clj->js {:messages [{:role "system"
+                                                                                           :content prompt}
+                                                                                          {:role "user"
+                                                                                           :content %}]
+                                                                               :model model
+                                                                               :response_format response-format}))]
+                 (parse-response response))
+              contexts)))))
 
 (defn main
   [plugin]
