@@ -191,7 +191,11 @@
                                                                                                   :content context}]
                                                                                       :model model
                                                                                       :response_format response-format}))]
-                        (.callFunction (:nvim @state) "Handle" (clj->js (setval :extmark extmark (parse-response response))))))
+                        (->> response
+                             parse-response
+                             (setval :extmark extmark)
+                             clj->js
+                             (.callFunction (:nvim @state) "Handle"))))
                     contexts
                     extmarks))))))
 
