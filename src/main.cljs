@@ -212,11 +212,11 @@
   []
   (promesa/let [sentences (get-sentences)]
     (when-not (empty? sentences)
-      (promesa/let [prompt (get-prompt)
+      (promesa/let [extmarks (set-sentence-extmarks sentences)
+                    prompt (get-prompt)
                     contexts (get-contexts sentences)
-                    extmarks (set-range-extmarks sentences)
                     buffer (.-buffer (:nvim @state))]
-        (set-sentence-extmarks sentences)
+        (set-range-extmarks sentences)
         (dorun (map (fn [context extmark]
                       (promesa/let [response (.chat.completions.create groq
                                                                        (clj->js {:messages [{:role "system"
