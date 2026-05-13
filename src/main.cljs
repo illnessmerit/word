@@ -52,14 +52,20 @@
   [promise]
   (.then promise #(js->clj % :keywordize-keys true)))
 
+(defn request
+  [function & args]
+  (.then (.request (:nvim @state) function (clj->js args))
+         #(js->clj % :keywordize-keys true)))
+
 (defn set-range-extmark
   [[previous-sentence target-sentence]]
-  (.request (:nvim @state) "nvim_buf_set_extmark" (clj->js [0
-                                                            (:range-namespace @state)
-                                                            (first previous-sentence)
-                                                            (last previous-sentence)
-                                                            {:end_col (last target-sentence)
-                                                             :end_row (first target-sentence)}])))
+  (request "nvim_buf_set_extmark"
+           0
+           (:range-namespace @state)
+           (first previous-sentence)
+           (last previous-sentence)
+           {:end_col (last target-sentence)
+            :end_row (first target-sentence)}))
 
 (defn set-range-extmarks
   [sentences]
@@ -68,13 +74,14 @@
 
 (defn set-sentence-extmark
   [[row start-col end-col]]
-  (.request (:nvim @state) "nvim_buf_set_extmark" (clj->js [0
-                                                            (:sentence-namespace @state)
-                                                            row
-                                                            start-col
-                                                            {:end_col end-col
-                                                             :end_row row
-                                                             :hl_group "DiagnosticUnderlineWarn"}])))
+  (request "nvim_buf_set_extmark"
+           0
+           (:sentence-namespace @state)
+           row
+           start-col
+           {:end_col end-col
+            :end_row row
+            :hl_group "DiagnosticUnderlineWarn"}))
 
 (def set-sentence-extmarks
   (comp parse-promise
@@ -179,16 +186,18 @@
 
 (defn handle*
   [payload]
-  (promesa/let [extmark (.request (:nvim @state) "nvim_buf_get_extmark_by_id" (clj->js [(:buffer payload)
-                                                                                        (:range-namespace @state)
-                                                                                        (:extmark payload)
-                                                                                        {:details true}]))]
-    (when-not (empty? (js->clj extmark :keywordize-keys true))
-      (.request (:nvim @state) "nvim_buf_get_extmarks" (clj->js [(:buffer payload)
-                                                                 (:range-namespace @state)
-                                                                 (take 2 (js->clj extmark :keywordize-keys true))
-                                                                 ((juxt :end_row :end_col) (last (js->clj extmark :keywordize-keys true)))
-                                                                 {:overlap true}])))))
+  (promesa/let [extmark (request "nvim_buf_get_extmark_by_id"
+                                 (:buffer payload)
+                                 (:range-namespace @state)
+                                 (:extmark payload)
+                                 {:details true})]
+    (when-not (empty? extmark)
+      (request "nvim_buf_get_extmarks"
+               (:buffer payload)
+               (:range-namespace @state)
+               (take 2 (js->clj extmark :keywordize-keys true))
+               ((juxt :end_row :end_col) (last (js->clj extmark :keywordize-keys true)))
+               {:overlap true}))))
 
 (def handle
   (comp handle*
