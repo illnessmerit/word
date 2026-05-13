@@ -63,6 +63,11 @@
                                                                                 :pos (drop-last (first sentences))}))]
     (cons (or (js->clj previous-sentence) [0 0 0]) sentences)))
 
+(defn get-range-bounds
+  [sentences]
+  (promesa/let [sentences* (prepend sentences)]
+    (all (transform [ALL ALL] (juxt first last) (partition 2 1 sentences*)))))
+
 (defn set-range-extmark
   [[start end]]
   (.request (:nvim @state) "nvim_buf_set_extmark" (clj->js [0
@@ -75,11 +80,6 @@
 (def set-range-extmarks
   (comp all
         (partial map set-range-extmark)))
-
-(defn get-range-bounds
-  [sentences]
-  (promesa/let [sentences* (prepend sentences)]
-    (all (transform [ALL ALL] (juxt first last) (partition 2 1 sentences*)))))
 
 (def llast
   (comp last last))
