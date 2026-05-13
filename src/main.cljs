@@ -172,14 +172,14 @@
 (defn get-analyses
   [sentences]
   (promesa/let [prompt (get-prompt)
-                context (get-contexts sentences)
+                contexts (get-contexts sentences)
                 responses (all (map #(.chat.completions.create groq (clj->js {:messages [{:role "system"
                                                                                           :content prompt}
                                                                                          {:role "user"
                                                                                           :content %}]
                                                                               :model model
                                                                               :response_format response-format}))
-                                    context))]
+                                    contexts))]
     (map parse-response responses)))
 
 (defn suggest
