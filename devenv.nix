@@ -33,7 +33,7 @@
   '';
   scripts.release.exec = "shadow-cljs release main";
   scripts.run.exec = ''
-    nvim "+lua vim.fn.Style(1)"
+    nvim "+lua vim.fn.Style(1)" README.md
   '';
   scripts.watch.exec = ''
     nvim +star "+te tail -F node.log -n +1"
