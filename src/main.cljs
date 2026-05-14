@@ -57,7 +57,7 @@
   [[previous-sentence target-sentence]]
   (request "nvim_buf_set_extmark"
            0
-           (:pending-range-namespace @state)
+           (:pending-range (:namespace @state))
            (first previous-sentence)
            (last previous-sentence)
            {:end_col (last target-sentence)
@@ -72,7 +72,7 @@
   [[row start-col end-col]]
   (request "nvim_buf_set_extmark"
            0
-           (:pending-sentence-namespace @state)
+           (:pending-sentence (:namespace @state))
            row
            start-col
            {:end_col end-col
@@ -179,28 +179,33 @@
         :choices
         #(js->clj % :keywordize-keys true)))
 
+(defn open-hud
+  []
+  (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
+                                                               :style "minimal"})))
+
 (defn handle*
   [payload]
   (promesa/let [pending-range-extmark (request "nvim_buf_get_extmark_by_id"
                                                (:buffer payload)
-                                               (:pending-range-namespace @state)
+                                               (:pending-range (:namespace @state))
                                                (:extmark payload)
                                                {:details true})]
     (when-not (empty? pending-range-extmark)
       (promesa/let [pending-sentence-extmark (request "nvim_buf_get_extmark_by_id"
                                                       (:buffer payload)
-                                                      (:pending-sentence-namespace @state)
+                                                      (:pending-sentence (:namespace @state))
                                                       (:extmark payload)
                                                       {:details true})
                     pending-range-extmarks (request "nvim_buf_get_extmarks"
                                                     (:buffer payload)
-                                                    (:pending-range-namespace @state)
+                                                    (:pending-range (:namespace @state))
                                                     (take 2 pending-range-extmark)
                                                     ((juxt :end_row :end_col) (last pending-range-extmark))
                                                     {:overlap true})
                     resolved-sentence-extmark (request "nvim_buf_set_extmark"
                                                        0
-                                                       (:resolved-sentence-namespace @state)
+                                                       (:resolved-sentence (:namespace @state))
                                                        (first pending-sentence-extmark)
                                                        (second pending-sentence-extmark)
                                                        (setval :hl_group
@@ -219,12 +224,12 @@
                 state)
         (request "nvim_buf_set_extmark"
                  0
-                 (:resolved-range-namespace @state)
+                 (:resolved-range (:namespace @state))
                  (first pending-range-extmark)
                  (second pending-range-extmark)
                  (select-keys (last pending-range-extmark) #{:end_row :end_col}))
         (all (mapcat (comp (apply juxt (map #(partial request "nvim_buf_del_extmark" (:buffer payload) %)
-                                            ((juxt :pending-range-namespace :pending-sentence-namespace) @state)))
+                                            ((juxt :pending-range :pending-sentence) (:namespace @state))))
                            first)
                      pending-range-extmarks))))))
 
@@ -264,14 +269,16 @@
   (promesa/let [pending-range-namespace (.createNamespace (.-nvim plugin) "pending-range")
                 pending-sentence-namespace (.createNamespace (.-nvim plugin) "pending-sentence")
                 resolved-range-namespace (.createNamespace (.-nvim plugin) "resolved-range")
-                resolved-sentence-namespace (.createNamespace (.-nvim plugin) "resolved-sentence")]
-    (reset! state {:cache {}
+                resolved-sentence-namespace (.createNamespace (.-nvim plugin) "resolved-sentence")
+                buffer (.createBuffer (.-nvim plugin) false true)]
+    (reset! state {:buffer buffer
+                   :cache {}
                    :index 0
-                   :nvim (.-nvim plugin)
-                   :pending-range-namespace pending-range-namespace
-                   :pending-sentence-namespace pending-sentence-namespace
-                   :resolved-range-namespace  resolved-range-namespace
-                   :resolved-sentence-namespace resolved-sentence-namespace}))
+                   :namespace {:pending-range pending-range-namespace
+                               :pending-sentence pending-sentence-namespace
+                               :resolved-range  resolved-range-namespace
+                               :resolved-sentence resolved-sentence-namespace}
+                   :nvim (.-nvim plugin)}))
   (.registerFunction plugin "Style" style (clj->js {:sync true}))
   (.registerFunction plugin "Suggest" suggest (clj->js {:sync true}))
   (.registerFunction plugin "Handle" handle (clj->js {:sync true})))
