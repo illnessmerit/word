@@ -102,7 +102,27 @@ Yes. `word` applies a highlight group to the targeted sentence.
 
 ## Displaying
 
-> Can the content of the Heads-Up Display (HUD) change while you are in Insert mode?
+> Is the Heads-Up Display (HUD) a floating window?
+
+No. Floating windows allow the cursor to move behind them. I could try to fix that by programmatically forcing the main window to scroll. But that's a heavy-handed solution.
+
+> Is the HUD a split window?
+
+Yes. I chose this architecture because:
+
+- If your cursor happens to overlap with the new window, Neovim pushes the text up so the content remains visible.
+
+- If the cursor isn't in the way, I can use `winsaveview` and `winrestview` to keep the visible lines in the same position on your screen.
+
+- You can jump in and out of the HUD using the keybindings you already use.
+
+There are a couple of trade-offs with this approach:
+
+- Opening a window and calling `winrestview` can cause a flicker.
+
+- Neovim reserves one line for a status line, which results in a wasted line of screen real estate.
+
+> Can the content of the HUD change while you are in Insert mode?
 
 Yes. If an asynchronous request from a command like `⌘ + f` finishes while you're typing, the HUD will update with those fresh suggestions. But the display stays anchored to the specific `extmark` you were on when you entered Insert mode. This lets you use the suggestions as a reference while you're editing the sentence. The HUD won't switch its focus to a different `extmark` just because you moved your cursor in Insert mode.
 
