@@ -53,7 +53,7 @@
   (.then (.request (:nvim @state) function (clj->js args))
          #(js->clj % :keywordize-keys true)))
 
-(defn set-range-extmark
+(defn refresh-range
   [[start end]]
   (promesa/let [extmarks (request "nvim_buf_get_extmarks"
                                   0
@@ -73,13 +73,13 @@
              {:end_col (last end)
               :end_row (first end)})))
 
-(defn set-range-extmarks
+(defn refresh-ranges
   [sentences]
   (promesa/let [sentences* (prepend sentences)]
     (->> sentences*
          (setval [ALL (nthpath 1)] NONE)
          (partition 2 1)
-         (map set-range-extmark)
+         (map refresh-range)
          all)))
 
 (defn set-sentence-extmark
@@ -306,7 +306,7 @@
                     prompt (get-prompt)
                     contexts (get-contexts sentences)
                     buffer (.-buffer (:nvim @state))]
-        (set-range-extmarks sentences)
+        (refresh-ranges sentences)
         (dorun (map (fn [context extmark]
                       (promesa/let [response (.chat.completions.create groq
                                                                        (clj->js {:messages [{:role "system"
