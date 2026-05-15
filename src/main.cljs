@@ -195,7 +195,7 @@
 
 (defn format-lines
   [cache]
-  ((if (:expalanation cache)
+  ((if (:explanation cache)
      (partial setval* AFTER-ELEM (:explanation cache))
      identity)
    (:suggestions cache)))
