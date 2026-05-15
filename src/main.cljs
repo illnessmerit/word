@@ -188,8 +188,8 @@
 
 (defn render-hud
   []
-  (promesa/let [window (.-window (:nvim @state))
-                cursor (.-cursor window)
+  (promesa/let [source-window (.-window (:nvim @state))
+                cursor (.-cursor source-window)
                 cursor* (transform (nthpath 0) dec (js->clj cursor))
                 extmarks (request "nvim_buf_get_extmarks"
                                   0
@@ -198,12 +198,12 @@
                                   cursor*
                                   {:overlap true})
                 hud-buffer (:buffer @state)
-                active-buffer (.-buffer (:nvim @state))]
+                source-buffer (.-buffer (:nvim @state))]
     (when-not (empty? extmarks)
       (.setLines hud-buffer
                  (-> @state
                      :cache
-                     ((-> active-buffer
+                     ((-> source-buffer
                           .-id
                           str
                           keyword))
@@ -215,8 +215,12 @@
                      clj->js)
                  (clj->js {:start 0
                            :end -1}))
-      (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
-                                                                   :style "minimal"})))))
+      (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
+                                                                                            :style "minimal"}))]
+        (setval [ATOM :window]
+                {:source (.-id source-window)
+                 :hud (.-id hud-window)}
+                state)))))
 
 (defn handle*
   [payload]
