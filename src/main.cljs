@@ -272,7 +272,7 @@
                      pending-range-extmarks))
         (render-hud)))))
 
-(def handle
+(def handle-result
   (comp handle*
         #(js->clj % :keywordize-keys true)
         first))
@@ -299,7 +299,7 @@
                              (merge {:extmark extmark
                                      :buffer (.-id buffer)})
                              clj->js
-                             (.callFunction (:nvim @state) "Handle"))))
+                             (.callFunction (:nvim @state) "HandleResult"))))
                     contexts
                     extmarks))))))
 
@@ -323,6 +323,6 @@
                    :nvim (.-nvim plugin)}))
   (.registerFunction plugin "Style" style (clj->js {:sync true}))
   (.registerFunction plugin "Suggest" suggest (clj->js {:sync true}))
-  (.registerFunction plugin "Handle" handle (clj->js {:sync true}))
+  (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')",
                                                                 :pattern "*"})))
