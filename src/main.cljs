@@ -215,13 +215,19 @@
                      clj->js)
                  (clj->js {:start 0
                            :end -1}))
-      (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
-                                                                                            :style "minimal"}))]
-        (setval [ATOM :window]
-                {:source source-window
-                 :hud hud-window}
-                state)
-        nil))))
+      (when-not (and (:window @state)
+                     (->> @state
+                          :window
+                          :source
+                          .-id
+                          (= (.-id source-window))))
+        (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
+                                                                                              :style "minimal"}))]
+          (setval [ATOM :window]
+                  {:source source-window
+                   :hud hud-window}
+                  state)
+          nil)))))
 
 (defn handle*
   [payload]
