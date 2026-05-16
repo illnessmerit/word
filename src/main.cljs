@@ -200,6 +200,12 @@
      identity)
    (:suggestions cache)))
 
+(defn close-hud
+  []
+  (when-let [window (:window @state)]
+    (setval [ATOM :window] NONE state)
+    (.close (:hud window))))
+
 (defn render-hud
   []
   (promesa/let [source-window (.-window (:nvim @state))
@@ -213,35 +219,36 @@
                                   {:overlap true})
                 hud-buffer (:buffer @state)
                 source-buffer (.-buffer (:nvim @state))]
-    (when-not (empty? extmarks)
-      (.setLines hud-buffer
-                 (-> @state
-                     :cache
-                     ((-> source-buffer
-                          .-id
-                          str
-                          keyword))
-                     ((-> extmarks
-                          ffirst
-                          str
-                          keyword))
-                     format-lines
-                     clj->js)
-                 (clj->js {:start 0
-                           :end -1}))
-      (when-not (and (:window @state)
-                     (->> @state
-                          :window
-                          :source
-                          .-id
-                          (= (.-id source-window))))
-        (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
-                                                                                              :style "minimal"}))]
-          (setval [ATOM :window]
-                  {:source source-window
-                   :hud hud-window}
-                  state)
-          nil)))))
+    (if (empty? extmarks)
+      (close-hud)
+      (do (.setLines hud-buffer
+                     (-> @state
+                         :cache
+                         ((-> source-buffer
+                              .-id
+                              str
+                              keyword))
+                         ((-> extmarks
+                              ffirst
+                              str
+                              keyword))
+                         format-lines
+                         clj->js)
+                     (clj->js {:start 0
+                               :end -1}))
+          (when-not (and (:window @state)
+                         (->> @state
+                              :window
+                              :source
+                              .-id
+                              (= (.-id source-window))))
+            (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
+                                                                                                  :style "minimal"}))]
+              (setval [ATOM :window]
+                      {:source source-window
+                       :hud hud-window}
+                      state)
+              nil))))))
 
 (defn handle*
   [payload]
@@ -269,7 +276,7 @@
                                                        (second pending-sentence-extmark)
                                                        (setval :hl_group
                                                                (if (:pass payload)
-                                                                 "DiagnosticUnderlineHint"
+                                                                 "DiagnosticUnderlineOk"
                                                                  "DiagnosticUnderlineError")
                                                                (select-keys (last pending-sentence-extmark) #{:end_row :end_col})))]
         (setval [ATOM
@@ -351,8 +358,9 @@
                                :resolved-range  resolved-range-namespace
                                :resolved-sentence resolved-sentence-namespace}
                    :nvim (.-nvim plugin)}))
-  (.registerFunction plugin "Style" style (clj->js {:sync true}))
-  (.registerFunction plugin "Suggest" suggest (clj->js {:sync true}))
+  (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')"
+                                                                :pattern "*"
+                                                                :sync true}))
   (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
-  (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')",
-                                                                :pattern "*"})))
+  (.registerFunction plugin "Style" style (clj->js {:sync true}))
+  (.registerFunction plugin "Suggest" suggest (clj->js {:sync true})))
