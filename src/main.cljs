@@ -208,47 +208,50 @@
 
 (defn render-hud
   []
-  (promesa/let [source-window (.-window (:nvim @state))
-                cursor (.-cursor source-window)
-                cursor* (transform (nthpath 0) dec (js->clj cursor))
-                extmarks (request "nvim_buf_get_extmarks"
-                                  0
-                                  (:resolved-range (:namespace @state))
-                                  cursor*
-                                  cursor*
-                                  {:overlap true})
-                hud-buffer (:buffer @state)
-                source-buffer (.-buffer (:nvim @state))]
-    (if (empty? extmarks)
-      (close-hud)
-      (do (.setLines hud-buffer
-                     (-> @state
-                         :cache
-                         ((-> source-buffer
-                              .-id
-                              str
-                              keyword))
-                         ((-> extmarks
-                              ffirst
-                              str
-                              keyword))
-                         format-lines
-                         clj->js)
-                     (clj->js {:start 0
-                               :end -1}))
-          (when-not (and (:window @state)
-                         (->> @state
-                              :window
-                              :source
-                              .-id
-                              (= (.-id source-window))))
-            (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
-                                                                                                  :style "minimal"}))]
-              (setval [ATOM :window]
-                      {:source source-window
-                       :hud hud-window}
-                      state)
-              nil))))))
+  ;; We guard against nil (:nvim @state) because Neovim may trigger autocommands during startup.
+  ;; Without this check, accessing properties like (.-window ...) on a null object throws a TypeError.
+  (when (:nvim @state)
+    (promesa/let [source-window (.-window (:nvim @state))
+                  cursor (.-cursor source-window)
+                  cursor* (transform (nthpath 0) dec (js->clj cursor))
+                  extmarks (request "nvim_buf_get_extmarks"
+                                    0
+                                    (:resolved-range (:namespace @state))
+                                    cursor*
+                                    cursor*
+                                    {:overlap true})
+                  hud-buffer (:buffer @state)
+                  source-buffer (.-buffer (:nvim @state))]
+      (if (empty? extmarks)
+        (close-hud)
+        (do (.setLines hud-buffer
+                       (-> @state
+                           :cache
+                           ((-> source-buffer
+                                .-id
+                                str
+                                keyword))
+                           ((-> extmarks
+                                ffirst
+                                str
+                                keyword))
+                           format-lines
+                           clj->js)
+                       (clj->js {:start 0
+                                 :end -1}))
+            (when-not (and (:window @state)
+                           (->> @state
+                                :window
+                                :source
+                                .-id
+                                (= (.-id source-window))))
+              (promesa/let [hud-window (.openWindow (:nvim @state) (:buffer @state) false (clj->js {:split "below"
+                                                                                                    :style "minimal"}))]
+                (setval [ATOM :window]
+                        {:source source-window
+                         :hud hud-window}
+                        state)
+                nil)))))))
 
 (defn handle*
   [payload]
@@ -339,9 +342,15 @@
                :source
                .-id
                (= (parse-long id)))
-      (.catch (.close (:hud window))
-              (fn [_]
-                (.quit (:nvim @state)))))))
+      ;; If only two windows remain attempting to close the HUD window during the 'WinClosed' autocommand of the source window triggers:
+      ;; E855: Autocommands caused command to abort
+      (promesa/let [windows (.-windows (:nvim @state))]
+        (if (->> windows
+                 js->clj
+                 count
+                 (= 2))
+          (.quit (:nvim @state))
+          (.close (:hud window)))))))
 
 (defn main
   [plugin]
@@ -358,6 +367,8 @@
                                :resolved-range  resolved-range-namespace
                                :resolved-sentence resolved-sentence-namespace}
                    :nvim (.-nvim plugin)}))
+  (.registerAutocmd plugin "CursorMoved" render-hud (clj->js {:pattern "*"
+                                                              :sync true}))
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')"
                                                                 :pattern "*"
                                                                 :sync true}))
