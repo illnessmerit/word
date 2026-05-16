@@ -351,9 +351,9 @@
                                :resolved-range  resolved-range-namespace
                                :resolved-sentence resolved-sentence-namespace}
                    :nvim (.-nvim plugin)}))
-  (.registerFunction plugin "Style" style (clj->js {:sync true}))
-  (.registerFunction plugin "Suggest" suggest (clj->js {:sync true}))
-  (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')",
                                                                 :pattern "*"
-                                                                :sync true})))
+                                                                :sync true}))
+  (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
+  (.registerFunction plugin "Style" style (clj->js {:sync true}))
+  (.registerFunction plugin "Suggest" suggest (clj->js {:sync true})))
