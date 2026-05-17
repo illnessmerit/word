@@ -228,8 +228,9 @@
                                       (:resolved-range (:namespace @state))
                                       cursor*
                                       cursor*
-                                      {:overlap true})]
-        (if (empty? extmarks)
+                                      {:overlap true})
+                    extmarks* (js->clj extmarks)]
+        (if (empty? extmarks*)
           (close-hud)
           (do (promesa/let [hud-buffer (:buffer @state)
                             source-buffer (.-buffer (:nvim @state))]
@@ -240,7 +241,7 @@
                                     .-id
                                     str
                                     keyword))
-                               ((-> extmarks
+                               ((-> extmarks*
                                     ffirst
                                     str
                                     keyword))
