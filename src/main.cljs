@@ -228,11 +228,25 @@
                                       (:resolved-range (:namespace @state))
                                       cursor*
                                       cursor*
-                                      {:overlap true})]
-        (if (empty? extmarks)
+                                      {:overlap true})
+                    extmarks* (js->clj extmarks)]
+        (if (empty? extmarks*)
           (close-hud)
           (do (promesa/let [hud-buffer (:buffer @state)
-                            source-buffer (.-buffer (:nvim @state))]
+                            source-buffer (.-buffer (:nvim @state))
+                            extmark (request "nvim_buf_get_extmark_by_id"
+                                             0
+                                             (:resolved-sentence (:namespace @state))
+                                             (ffirst extmarks*)
+                                             {:details true})]
+                (request "nvim_buf_set_extmark"
+                         0
+                         (:active-sentence (:namespace @state))
+                         (first extmark)
+                         (second extmark)
+                         (merge {:hl_group "LspReferenceText"
+                                 :id 1}
+                                (select-keys (last extmark) #{:end_row :end_col})))
                 (.setLines hud-buffer
                            (-> @state
                                :cache
@@ -240,7 +254,7 @@
                                     .-id
                                     str
                                     keyword))
-                               ((-> extmarks
+                               ((-> extmarks*
                                     ffirst
                                     str
                                     keyword))
@@ -259,8 +273,10 @@
                   (setval [ATOM :window]
                           {:source (.-id source-window)
                            :hud (.-id hud-window)}
-                          state)
-                  nil))))))))
+                          state)))))))
+    ;; We return nil to ensure the promise resolves to a value that can be safely serialized via RPC.
+    ;; In synchronous autocommands, if the promise resolves to a structure containing non-serializable objects, the Neovim Node client throws "Error: Unrecognized object".
+    nil))
 
 (defn handle*
   [payload]
@@ -351,8 +367,8 @@
     (condp = (parse-long id)
       (:source window)
       (do (setval [ATOM :window] NONE state)
-      ;; If only two windows remain attempting to close the HUD window during the 'WinClosed' autocommand of the source window triggers:
-      ;; E855: Autocommands caused command to abort
+          ;; If only two windows remain attempting to close the HUD window during the 'WinClosed' autocommand of the source window triggers:
+          ;; E855: Autocommands caused command to abort
           (promesa/let [windows (.-windows (:nvim @state))]
             (if (->> windows
                      js->clj
@@ -361,7 +377,8 @@
               (.quit (:nvim @state))
               (request "nvim_win_close" (:hud window) true))))
       (:hud window)
-      (setval [ATOM :window] NONE state)
+      (do (setval [ATOM :window] NONE state)
+          nil)
       nil)))
 
 (defn main
@@ -370,6 +387,7 @@
                 pending-sentence-namespace (.createNamespace (.-nvim plugin) "pending-sentence")
                 resolved-range-namespace (.createNamespace (.-nvim plugin) "resolved-range")
                 resolved-sentence-namespace (.createNamespace (.-nvim plugin) "resolved-sentence")
+                active-sentence-namespace (.createNamespace (.-nvim plugin) "active-sentence")
                 buffer (.createBuffer (.-nvim plugin) false true)]
     (reset! state {:buffer buffer
                    :cache {}
@@ -377,7 +395,8 @@
                    :namespace {:pending-range pending-range-namespace
                                :pending-sentence pending-sentence-namespace
                                :resolved-range  resolved-range-namespace
-                               :resolved-sentence resolved-sentence-namespace}
+                               :resolved-sentence resolved-sentence-namespace
+                               :active-sentence active-sentence-namespace}
                    :nvim (.-nvim plugin)}))
   (.registerAutocmd plugin "CursorMoved" render-hud (clj->js {:pattern "*"
                                                               :sync true}))
