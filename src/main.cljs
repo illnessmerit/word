@@ -351,8 +351,8 @@
     (condp = (parse-long id)
       (:source window)
       (do (setval [ATOM :window] NONE state)
-      ;; If only two windows remain attempting to close the HUD window during the 'WinClosed' autocommand of the source window triggers:
-      ;; E855: Autocommands caused command to abort
+          ;; If only two windows remain attempting to close the HUD window during the 'WinClosed' autocommand of the source window triggers:
+          ;; E855: Autocommands caused command to abort
           (promesa/let [windows (.-windows (:nvim @state))]
             (if (->> windows
                      js->clj
