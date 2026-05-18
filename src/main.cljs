@@ -330,10 +330,10 @@
 (def apply-suggestion
   (comp apply-suggestion* first))
 
-(defn handle-closing
+(defn handle-closing*
   [id]
   (when-let [window (:window @state)]
-    (condp = (parse-long id)
+    (condp = id
       (:source window)
       (do (setval [ATOM :window] NONE state)
           ;; If only two windows remain attempting to close the HUD window during the 'WinClosed' autocommand of the source window triggers:
@@ -349,6 +349,9 @@
       (do (setval [ATOM :window] NONE state)
           nil)
       nil)))
+
+(def handle-closing
+  (comp handle-closing* parse-long))
 
 (defn handle*
   [payload]
