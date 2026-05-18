@@ -202,6 +202,7 @@
 
 (defn close-hud
   []
+  (request "nvim_buf_clear_namespace" 0 (:active-sentence (:namespace @state)) 0 -1)
   (when-let [window (:window @state)]
     (setval [ATOM :window] NONE state)
     (request "nvim_win_close" (:hud window) true)))
