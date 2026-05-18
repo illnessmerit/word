@@ -290,26 +290,36 @@
   (promesa/let [extmarks (get-extmarks)]
     (when-not (empty? extmarks)
       (promesa/let [extmark (get-sentence-extmark (ffirst extmarks))
-                    buffer (.-buffer (:nvim @state))]
+                    buffer (.-buffer (:nvim @state))
+                    suggestion (-> @state
+                                   :cache
+                                   ((-> buffer
+                                        .-id
+                                        str
+                                        keyword))
+                                   ((-> extmarks
+                                        ffirst
+                                        str
+                                        keyword))
+                                   :suggestions
+                                   (nth (dec index)))]
         (request "nvim_buf_set_text"
                  (.-id buffer)
                  (first extmark)
                  (second extmark)
                  (:end_row (last extmark))
                  (:end_col (last extmark))
-                 (-> @state
-                     :cache
-                     ((-> buffer
-                          .-id
-                          str
-                          keyword))
-                     ((-> extmarks
-                          ffirst
-                          str
-                          keyword))
-                     :suggestions
-                     (nth (dec index))
-                     vector))))))
+                 [suggestion])
+        ;; https://github.com/neovim/neovim/issues/30331
+        (request "nvim_buf_set_extmark"
+                 (.-id buffer)
+                 (:resolved-sentence (:namespace @state))
+                 (first extmark)
+                 (second extmark)
+                 {:end_col (+ (second extmark) (count suggestion))
+                  :end_row (first extmark)
+                  :hl_group "DiagnosticUnderlineOk"
+                  :id (ffirst extmarks)})))))
 
 (defn handle-closing
   [id]
