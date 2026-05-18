@@ -481,6 +481,8 @@
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')"
                                                                 :pattern "*"
                                                                 :sync true}))
+  (.registerAutocmd plugin "WinResized" render-hud (clj->js {:pattern "*"
+                                                             :sync true}))
   (.registerFunction plugin "Apply" apply-suggestion (clj->js {:sync true}))
   (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
   (.registerFunction plugin "Style" style (clj->js {:sync true}))
