@@ -285,7 +285,7 @@
     ;; In synchronous autocommands, if the promise resolves to a structure containing non-serializable objects, the Neovim Node client throws "Error: Unrecognized object".
     nil))
 
-(defn apply-suggestion
+(defn apply-suggestion*
   [index]
   (promesa/let [extmarks (get-extmarks)]
     (when-not (empty? extmarks)
@@ -326,6 +326,9 @@
                  (first extmark)
                  (second extmark)
                  (setval :hl_group "DiagnosticUnderlineOk" opts))))))
+
+(def apply-suggestion
+  (comp apply-suggestion* first))
 
 (defn handle-closing
   [id]
@@ -455,6 +458,7 @@
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')"
                                                                 :pattern "*"
                                                                 :sync true}))
+  (.registerFunction plugin "Apply" apply-suggestion (clj->js {:sync true}))
   (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
   (.registerFunction plugin "Style" style (clj->js {:sync true}))
   (.registerFunction plugin "Suggest" suggest (clj->js {:sync true})))
