@@ -33,7 +33,7 @@
   '';
   scripts.release.exec = "shadow-cljs release main";
   scripts.run.exec = ''
-    nvim "+lua vim.fn.Style(1)" README.md
+    nvim README.md
   '';
   scripts.watch.exec = ''
     nvim +star "+te tail -F node.log -n +1"
@@ -77,6 +77,7 @@
     # https://github.com/NixOS/nixfmt/blob/f723c1c1aaa91908d2fa66f0432fd2c5db9c21a1/README.md?plain=1#L169
     nixfmt.enable = true;
     prettier.enable = true;
+    shellcheck.enable = true;
     stylua.enable = true;
     trailing-whitespace = {
       enable = true;
