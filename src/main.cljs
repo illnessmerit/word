@@ -332,15 +332,15 @@
         (request "nvim_buf_set_extmark"
                  (.-id buffer)
                  (:resolved-sentence (:namespace @state))
-                 (second (first extmarks))
-                 (last (first extmarks))
-                 opts)
+                 (first extmark)
+                 (second extmark)
+                 (setval :hl_group "DiagnosticUnderlineOk" opts))
         (request "nvim_buf_set_extmark"
                  (.-id buffer)
                  (:resolved-range (:namespace @state))
-                 (first extmark)
-                 (second extmark)
-                 (setval :hl_group "DiagnosticUnderlineOk" opts))))))
+                 (second (first extmarks))
+                 (last (first extmarks))
+                 opts)))))
 
 (def apply-suggestion
   (comp apply-suggestion* first))
