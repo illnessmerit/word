@@ -84,7 +84,7 @@
    pbpaste > ~/.config/word/groq
    brew install node
    npm install -g neovim
-   nvim --headless +UpdateRemotePlugins +qa!
+   nvim --headless "+Lazy load word" +UpdateRemotePlugins +qa!
    ```
 
 ## Usage
