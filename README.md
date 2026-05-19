@@ -23,9 +23,9 @@
    ```toml
    [keyboard]
    bindings = [
-     { chars = "\u001bf", key = "F", mods = "Command" },
-     { chars = "\u001bj", key = "J", mods = "Command" },
-     { chars = "\u001bk", key = "K", mods = "Command" },
+     { chars = "\u001bwf", key = "F", mods = "Command" },
+     { chars = "\u001bwj", key = "J", mods = "Command" },
+     { chars = "\u001bwk", key = "K", mods = "Command" },
    ]
    ```
 
@@ -41,21 +41,21 @@
    	},
    	keys = {
    		{
-   			"<M-f>",
+   			"<M-w>f",
    			function()
    				require("word").suggest()
    			end,
    			mode = { "i", "n", "x" },
    		},
    		{
-   			"<M-j>",
+   			"<M-w>j",
    			function()
    				require("word").apply(2)
    			end,
    			mode = { "i", "n", "x" },
    		},
    		{
-   			"<M-k>",
+   			"<M-w>k",
    			function()
    				require("word").apply(1)
    			end,
@@ -114,11 +114,11 @@ Yes.
    ```toml
    [keyboard]
    bindings = [
-     { chars = "\u001b1", key = "Key1", mods = "Command" },
-     { chars = "\u001b2", key = "Key2", mods = "Command" },
-     { chars = "\u001bf", key = "F", mods = "Command" },
-     { chars = "\u001bj", key = "J", mods = "Command" },
-     { chars = "\u001bk", key = "K", mods = "Command" },
+     { chars = "\u001bw1", key = "Key1", mods = "Command" },
+     { chars = "\u001bw2", key = "Key2", mods = "Command" },
+     { chars = "\u001bwf", key = "F", mods = "Command" },
+     { chars = "\u001bwj", key = "J", mods = "Command" },
+     { chars = "\u001bwk", key = "K", mods = "Command" },
    ]
    ```
 
@@ -136,35 +136,35 @@ Yes.
    	},
    	keys = {
    		{
-   			"<M-1>",
+   			"<M-w>1",
    			function()
    				require("word").style(1)
    			end,
    			mode = { "i", "n", "x" },
    		},
    		{
-   			"<M-2>",
+   			"<M-w>2",
    			function()
    				require("word").style(2)
    			end,
    			mode = { "i", "n", "x" },
    		},
    		{
-   			"<M-f>",
+   			"<M-w>f",
    			function()
    				require("word").suggest()
    			end,
    			mode = { "i", "n", "x" },
    		},
    		{
-   			"<M-j>",
+   			"<M-w>j",
    			function()
    				require("word").apply(2)
    			end,
    			mode = { "i", "n", "x" },
    		},
    		{
-   			"<M-k>",
+   			"<M-w>k",
    			function()
    				require("word").apply(1)
    			end,
