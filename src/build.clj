@@ -5,5 +5,5 @@
   {:shadow.build/stage :flush}
   [state]
   (println "Updating Neovim remote plugins.")
-  (sh "nvim" "--headless" "+UpdateRemotePlugins" "+qa!")
+  (sh "nvim" "--headless" "+Lazy load word" "+UpdateRemotePlugins" "+qa!")
   state)
