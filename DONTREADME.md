@@ -92,6 +92,14 @@ Highlighting the sentence allows you to scan for issues across multiple sentence
 
 `DiagnosticUnderlineOk` is used. It's the semantic opposite of an error.
 
+> Can editing a sentence clear its fail indicator?
+
+Yes. If you edit a sentence that has a fail indicator and your change causes the text to no longer match the text of the sentence when suggestions were requested, the fail indicator is removed.
+
+> Does applying a suggestion change a fail indicator to a pass indicator?
+
+Yes. When you apply one of the currently cached suggestions to a sentence with a fail indicator, the fail indicator is replaced by a pass indicator.
+
 > Does `word` show an indicator on the sentence you can apply a suggestion to without moving the cursor?
 
 Yes. `word` applies a highlight group to the targeted sentence.
