@@ -539,6 +539,10 @@
                    :nvim (.-nvim plugin)}))
   (.registerAutocmd plugin "CursorMoved" render-hud (clj->js {:pattern "*"
                                                               :sync true}))
+  (.registerAutocmd plugin "TextChanged" refresh-highlights (clj->js {:pattern "*"
+                                                                      :sync true}))
+  (.registerAutocmd plugin "TextChangedI" refresh-highlights (clj->js {:pattern "*"
+                                                                       :sync true}))
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')"
                                                                 :pattern "*"
                                                                 :sync true}))
