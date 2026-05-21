@@ -66,7 +66,7 @@
    		styles = {
    			{
    				name = "casual",
-   				prompt = "Check if the sentence is grammatically correct. Explain any errors. Give two casual rewrites.",
+   				prompt = "Check if the sentence is grammatically correct. Explain any errors. Give two casual rewrites, keeping markup.",
    			},
    		},
    	},
@@ -173,8 +173,8 @@ Yes.
    	},
    	opts = {
    		styles = {
-   			{ name = "casual", prompt = base .. "Give two casual rewrites." },
-   			{ name = "formal", prompt = base .. "Give two formal rewrites." },
+   			{ name = "casual", prompt = base .. "Give two casual rewrites, keeping markup." },
+   			{ name = "formal", prompt = base .. "Give two formal rewrites, keeping markup." },
    		},
    	},
    }
