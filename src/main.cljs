@@ -299,6 +299,9 @@
     ;; In synchronous autocommands, if the promise resolves to a structure containing non-serializable objects, the Neovim Node client throws "Error: Unrecognized object".
     nil))
 
+(def pass-highlight
+  "DiagnosticUnderlineOk")
+
 (defn apply-suggestion*
   [index]
   (promesa/let [extmarks (get-extmarks)]
@@ -333,7 +336,7 @@
                  (:resolved-sentence (:namespace @state))
                  (first extmark)
                  (second extmark)
-                 (setval :hl_group "DiagnosticUnderlineOk" opts))
+                 (setval :hl_group pass-highlight opts))
         (request "nvim_buf_set_extmark"
                  (.-id buffer)
                  (:resolved-range (:namespace @state))
@@ -393,7 +396,7 @@
                                                        (second pending-sentence-extmark)
                                                        (setval :hl_group
                                                                (if (:pass payload)
-                                                                 "DiagnosticUnderlineOk"
+                                                                 pass-highlight
                                                                  "DiagnosticUnderlineError")
                                                                (select-keys (last pending-sentence-extmark) #{:end_row :end_col})))]
         (setval [ATOM
