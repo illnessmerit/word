@@ -66,7 +66,7 @@
    		styles = {
    			{
    				name = "casual",
-   				prompt = "Use a casual tone. Use correct grammar. Check if the sentence meets these requirements. Explain any failures. Give two rewrites of the sentence.",
+   				prompt = "Check if the sentence is grammatically correct. Explain any errors. Keep the formatting. Give two casual rewrites.",
    			},
    		},
    	},
@@ -125,7 +125,7 @@ Yes.
 1. Add the number keybindings and the second style to your `lazy.nvim` configuration:
 
    ```lua
-   local base = " Use correct grammar. Check if the sentence meets these requirements. Explain any failures. Give two rewrites of the sentence."
+   local base = "Check if the sentence is grammatically correct. Explain any errors. Keep the formatting. "
 
    {
    	"8ta4/word",
@@ -173,8 +173,8 @@ Yes.
    	},
    	opts = {
    		styles = {
-   			{ name = "casual", prompt = "Use a casual tone." .. base },
-   			{ name = "formal", prompt = "Use a formal tone." .. base },
+   			{ name = "casual", prompt = base .. "Give two casual rewrites." },
+   			{ name = "formal", prompt = base .. "Give two formal rewrites." },
    		},
    	},
    }
