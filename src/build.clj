@@ -1,14 +1,21 @@
 (ns build
-  (:require [babashka.fs :refer [expand-home file]]
+  (:require [babashka.fs :refer [create-dirs expand-home file]]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as string]))
 
+(def plugins-directory
+  (expand-home "~/.config/nvim/lua/plugins/"))
+
+(def plugin-file
+  (file plugins-directory "devenv.lua"))
+
 (defn configure-plugin
   []
+  (create-dirs plugins-directory)
   (->> "DEVENV_ROOT"
        System/getenv
        (string/replace (slurp "template.lua") "{{dir}}")
-       (spit (file (expand-home "~/.config/nvim/lua/plugins/devenv.lua")))))
+       (spit plugin-file)))
 
 (defn build
   {:shadow.build/stage :flush}
