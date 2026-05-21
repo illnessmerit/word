@@ -404,7 +404,7 @@
                      str
                      keyword)
                  (keyword (str resolved-sentence-extmark))]
-                (select-keys payload #{:explanation :suggestions})
+                (select-keys payload #{:explanation :pass :suggestions})
                 state)
         (request "nvim_buf_set_extmark"
                  (:buffer payload)
