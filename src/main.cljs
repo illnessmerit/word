@@ -299,6 +299,15 @@
     ;; In synchronous autocommands, if the promise resolves to a structure containing non-serializable objects, the Neovim Node client throws "Error: Unrecognized object".
     nil))
 
+(def pass-highlight
+  "DiagnosticUnderlineOk")
+
+(def fail-highlight
+  "DiagnosticUnderlineError")
+
+(def unverified-highlight
+  "DiagnosticUnderlineHint")
+
 (defn apply-suggestion*
   [index]
   (promesa/let [extmarks (get-extmarks)]
@@ -333,7 +342,7 @@
                  (:resolved-sentence (:namespace @state))
                  (first extmark)
                  (second extmark)
-                 (setval :hl_group "DiagnosticUnderlineOk" opts))
+                 (setval :hl_group pass-highlight opts))
         (request "nvim_buf_set_extmark"
                  (.-id buffer)
                  (:resolved-range (:namespace @state))
@@ -393,8 +402,8 @@
                                                        (second pending-sentence-extmark)
                                                        (setval :hl_group
                                                                (if (:pass payload)
-                                                                 "DiagnosticUnderlineOk"
-                                                                 "DiagnosticUnderlineError")
+                                                                 pass-highlight
+                                                                 fail-highlight)
                                                                (select-keys (last pending-sentence-extmark) #{:end_row :end_col})))]
         (setval [ATOM
                  :cache
@@ -459,6 +468,58 @@
                         contexts
                         extmarks))))))))
 
+(defn get-contexts
+  [sentences]
+  (promesa/let [sentences* (prepend sentences)
+                sentences** (append sentences*)
+                lines (.buffer.getLines (:nvim @state) (clj->js {:start (ffirst sentences**)
+                                                                 :end (inc (first (last sentences**)))}))]
+    (get-contexts* (map (fn [[row start-col end-col]]
+                          (subs (nth (js->clj lines) (- row (ffirst sentences**))) start-col end-col))
+                        sentences**))))
+
+(defn refresh-highlights
+  []
+  (promesa/let [first-line (.callFunction (:nvim @state) "line" (clj->js ["w0"]))
+                last-line (.callFunction (:nvim @state) "line" (clj->js ["w$"]))
+                extmarks (request "nvim_buf_get_extmarks"
+                                  0
+                                  (:resolved-sentence (:namespace @state))
+                                  [(dec first-line) 0]
+                                  [(dec last-line) -1]
+                                  {:details true
+                                   :overlap true})
+                lines (.buffer.getLines (:nvim @state) (clj->js {:start (dec first-line)
+                                                                 :end last-line}))
+                buffer (.-buffer (:nvim @state))]
+    (dorun (map (fn [[id row col details]]
+                  (request "nvim_buf_set_extmark"
+                           0
+                           (:resolved-sentence (:namespace @state))
+                           row
+                           col
+                           (merge (select-keys details #{:end_col :end_row})
+                                  {:hl_group (if (= row (:end_row details))
+                                               (let [current-text (subs (nth (js->clj lines) (- row (dec first-line))) col (:end_col details))
+                                                     cache-entry (->> @state
+                                                                      :cache
+                                                                      ((-> buffer
+                                                                           .-id
+                                                                           str
+                                                                           keyword))
+                                                                      ((keyword (str id))))]
+                                                 (cond (= current-text (:target-sentence cache-entry))
+                                                       (if (:pass cache-entry)
+                                                         pass-highlight
+                                                         fail-highlight)
+                                                       ((set (:suggestions cache-entry)) current-text)
+                                                       pass-highlight
+                                                       :else
+                                                       unverified-highlight))
+                                               unverified-highlight)
+                                   :id id})))
+                extmarks))))
+
 (defn main
   [plugin]
   (promesa/let [pending-range-namespace (.createNamespace (.-nvim plugin) "pending-range")
@@ -478,11 +539,17 @@
                    :nvim (.-nvim plugin)}))
   (.registerAutocmd plugin "CursorMoved" render-hud (clj->js {:pattern "*"
                                                               :sync true}))
+  (.registerAutocmd plugin "TextChanged" refresh-highlights (clj->js {:pattern "*"
+                                                                      :sync true}))
+  (.registerAutocmd plugin "TextChangedI" refresh-highlights (clj->js {:pattern "*"
+                                                                       :sync true}))
   (.registerAutocmd plugin "WinClosed" handle-closing (clj->js {:eval "expand('<amatch>')"
                                                                 :pattern "*"
                                                                 :sync true}))
   (.registerAutocmd plugin "WinResized" render-hud (clj->js {:pattern "*"
                                                              :sync true}))
+  (.registerAutocmd plugin "WinScrolled" refresh-highlights (clj->js {:pattern "*"
+                                                                      :sync true}))
   (.registerFunction plugin "Apply" apply-suggestion (clj->js {:sync true}))
   (.registerFunction plugin "HandleResult" handle-result (clj->js {:sync true}))
   (.registerFunction plugin "Style" style (clj->js {:sync true}))

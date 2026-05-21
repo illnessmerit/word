@@ -29,7 +29,6 @@ jobs:
         run: |
           hello
       - run: devenv shell release
-      - run: devenv shell node rplugin/node/main.js
       - run: tar czf word.tar.gz node_modules rplugin/node
       # https://github.com/softprops/action-gh-release/blob/403a5240f3837fa857f642062e05aad6bb3391ca/README.md?plain=1#L110-L114
       - name: Release
