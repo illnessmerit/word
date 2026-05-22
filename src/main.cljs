@@ -478,15 +478,18 @@
                         buffer (.-buffer (:nvim @state))]
             (refresh-ranges sentences)
             (dorun (map (fn [context extmark]
-                          (promesa/let [response (.chat.completions.create groq
-                                                                           (clj->js {:messages [{:role "system"
-                                                                                                 :content prompt}
-                                                                                                {:role "user"
-                                                                                                 :content (str context)}]
-                                                                                     :model model
-                                                                                     :response_format response-format
-                                                                                     ;; We set reasoning_effort to "high" because links inside sentences tend to get stripped away otherwise.
-                                                                                     :reasoning_effort "high"}))]
+                          (promesa/let [response (promesa/catch (.chat.completions.create groq
+                                                                                          (clj->js {:messages [{:role "system"
+                                                                                                                :content prompt}
+                                                                                                               {:role "user"
+                                                                                                                :content (str context)}]
+                                                                                                    :model model
+                                                                                                    :response_format response-format
+                                                                                                    ;; We set reasoning_effort to "high" because links inside sentences tend to get stripped away otherwise.
+                                                                                                    :reasoning_effort "high"}))
+                                                                (fn [_]
+                                                                  (all (map #(request "nvim_buf_del_extmark" 0 (% (:namespace @state)) extmark)
+                                                                            [:pending-range :pending-sentence]))))]
                             (->> response
                                  parse-response
                                  (merge context
