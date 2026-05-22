@@ -465,6 +465,7 @@
                                                                                                  :content (str context)}]
                                                                                      :model model
                                                                                      :response_format response-format
+                                                                                     ;; We set reasoning_effort to "high" because links inside sentences tend to get stripped away otherwise.
                                                                                      :reasoning_effort "high"}))]
                             (->> response
                                  parse-response
