@@ -52,14 +52,26 @@
   (.then (.request (:nvim @state) function (clj->js args))
          #(js->clj % :keywordize-keys true)))
 
+(defn get-overlapping-extmarks
+  [buf ns-id start end]
+  (promesa/let [grault (request "nvim_buf_get_extmarks"
+                                buf
+                                ns-id
+                                start
+                                end
+                                {:details true
+                                 :overlap true})]
+    (remove (fn [[_ row col details]]
+              (or (= start ((juxt :end_row :end_col) details))
+                  (= end [row col])))
+            grault)))
+
 (defn refresh-range
   [[start end]]
-  (promesa/let [extmarks (request "nvim_buf_get_extmarks"
-                                  0
-                                  (:resolved-range (:namespace @state))
-                                  (transform (nthpath 1) inc start)
-                                  (transform (nthpath 1) dec end)
-                                  {:overlap true})]
+  (promesa/let [extmarks (get-overlapping-extmarks 0
+                                                   (:resolved-range (:namespace @state))
+                                                   start
+                                                   end)]
     (all (mapcat (comp (apply juxt (map #(partial request "nvim_buf_del_extmark" 0 %)
                                         ((juxt :resolved-range :resolved-sentence) (:namespace @state))))
                        first)
@@ -406,12 +418,10 @@
                                                       (:pending-sentence (:namespace @state))
                                                       (:extmark payload)
                                                       {:details true})
-                    pending-range-extmarks (request "nvim_buf_get_extmarks"
-                                                    (:buffer payload)
-                                                    (:pending-range (:namespace @state))
-                                                    (take 2 pending-range-extmark)
-                                                    ((juxt :end_row :end_col) (last pending-range-extmark))
-                                                    {:overlap true})
+                    pending-range-extmarks (get-overlapping-extmarks (:buffer payload)
+                                                                     (:pending-range (:namespace @state))
+                                                                     (take 2 pending-range-extmark)
+                                                                     ((juxt :end_row :end_col) (last pending-range-extmark)))
                     resolved-sentence-extmark (request "nvim_buf_set_extmark"
                                                        (:buffer payload)
                                                        (:resolved-sentence (:namespace @state))
