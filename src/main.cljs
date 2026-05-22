@@ -162,7 +162,7 @@
    ;; https://console.groq.com/docs/structured-outputs
    ;; maxLength and minLength are not explicitly documented in Groq's Structured Outputs guide.
    ;; But they appear to be supported.
-   :maxLength 100
+   :maxLength 1000
    :minLength 1})
 
 (def suggestions
