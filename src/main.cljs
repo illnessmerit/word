@@ -464,7 +464,8 @@
                                                                                                 {:role "user"
                                                                                                  :content (str context)}]
                                                                                      :model model
-                                                                                     :response_format response-format}))]
+                                                                                     :response_format response-format
+                                                                                     :reasoning_effort "high"}))]
                             (->> response
                                  parse-response
                                  (merge context
