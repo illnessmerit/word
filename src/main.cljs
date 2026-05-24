@@ -502,45 +502,46 @@
 
 (defn refresh-highlights
   []
-  (promesa/let [first-line (.callFunction (:nvim @state) "line" (clj->js ["w0"]))
-                last-line (.callFunction (:nvim @state) "line" (clj->js ["w$"]))
-                extmarks (request "nvim_buf_get_extmarks"
-                                  0
-                                  (:resolved-sentence (:namespace @state))
-                                  [(dec first-line) 0]
-                                  [(dec last-line) -1]
-                                  {:details true
-                                   :overlap true})
-                lines (.buffer.getLines (:nvim @state) (clj->js {:start (dec first-line)
-                                                                 :end last-line}))
-                buffer (.-buffer (:nvim @state))]
-    (dorun (map (fn [[id row col details]]
-                  (request "nvim_buf_set_extmark"
-                           0
-                           (:resolved-sentence (:namespace @state))
-                           row
-                           col
-                           (merge (select-keys details #{:end_col :end_row})
-                                  {:hl_group (if (= row (:end_row details))
-                                               (let [current-text (subs (nth (js->clj lines) (- row (dec first-line))) col (:end_col details))
-                                                     cache-entry (->> @state
-                                                                      :cache
-                                                                      ((-> buffer
-                                                                           .-id
-                                                                           str
-                                                                           keyword))
-                                                                      ((keyword (str id))))]
-                                                 (cond (= current-text (:target-sentence cache-entry))
-                                                       (if (:pass cache-entry)
+  (when (:nvim @state)
+    (promesa/let [first-line (.callFunction (:nvim @state) "line" (clj->js ["w0"]))
+                  last-line (.callFunction (:nvim @state) "line" (clj->js ["w$"]))
+                  extmarks (request "nvim_buf_get_extmarks"
+                                    0
+                                    (:resolved-sentence (:namespace @state))
+                                    [(dec first-line) 0]
+                                    [(dec last-line) -1]
+                                    {:details true
+                                     :overlap true})
+                  lines (.buffer.getLines (:nvim @state) (clj->js {:start (dec first-line)
+                                                                   :end last-line}))
+                  buffer (.-buffer (:nvim @state))]
+      (dorun (map (fn [[id row col details]]
+                    (request "nvim_buf_set_extmark"
+                             0
+                             (:resolved-sentence (:namespace @state))
+                             row
+                             col
+                             (merge (select-keys details #{:end_col :end_row})
+                                    {:hl_group (if (= row (:end_row details))
+                                                 (let [current-text (subs (nth (js->clj lines) (- row (dec first-line))) col (:end_col details))
+                                                       cache-entry (->> @state
+                                                                        :cache
+                                                                        ((-> buffer
+                                                                             .-id
+                                                                             str
+                                                                             keyword))
+                                                                        ((keyword (str id))))]
+                                                   (cond (= current-text (:target-sentence cache-entry))
+                                                         (if (:pass cache-entry)
+                                                           pass-highlight
+                                                           fail-highlight)
+                                                         ((set (:suggestions cache-entry)) current-text)
                                                          pass-highlight
-                                                         fail-highlight)
-                                                       ((set (:suggestions cache-entry)) current-text)
-                                                       pass-highlight
-                                                       :else
-                                                       unverified-highlight))
-                                               unverified-highlight)
-                                   :id id})))
-                extmarks))))
+                                                         :else
+                                                         unverified-highlight))
+                                                 unverified-highlight)
+                                     :id id})))
+                  extmarks)))))
 
 (defn main
   [plugin]
