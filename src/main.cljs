@@ -17,6 +17,7 @@
 
 (defn decode
   [s]
+  ;; This ensures that string length matches the UTF-8 byte count because Neovim uses byte-indexed positions.
   (.toString (js/Buffer.from s) "latin1"))
 
 (defn get-selection-bounds
