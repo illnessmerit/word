@@ -502,6 +502,8 @@
 
 (defn refresh-highlights
   []
+  ;; We guard against nil (:nvim @state) because Neovim may trigger autocommands during startup.
+  ;; Without this check, invoking methods like (.callFunction ...) on a null object throws a TypeError.
   (when (:nvim @state)
     (promesa/let [first-line (.callFunction (:nvim @state) "line" (clj->js ["w0"]))
                   last-line (.callFunction (:nvim @state) "line" (clj->js ["w$"]))
