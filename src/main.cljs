@@ -1,6 +1,5 @@
 (ns main
   (:require [cljs-node-io.core :refer [slurp]]
-            [cljs-node-io.fs :refer [readable?]]
             [cljs.math :refer [ceil]]
             [com.rpl.specter :refer [AFTER-ELEM ALL ATOM MAP-VALS NONE nthpath pred= setval setval* transform]]
             [groq-sdk :refer [Groq]]
@@ -366,15 +365,6 @@
 (def apply-suggestion
   (comp apply-suggestion* first))
 
-(defn clean?
-  []
-  (promesa/let [buffer (.-buffer (:nvim @state))
-                path (.-name buffer)]
-    (and (readable? path)
-         (promesa/let [buffer-lines (.-lines buffer)
-                       file-lines (.callFunction (:nvim @state) "readfile" path)]
-           (= (js->clj buffer-lines) (js->clj file-lines))))))
-
 (defn handle-closing*
   [id]
   (when-let [window (:window @state)]
@@ -385,17 +375,17 @@
           ;; E855: Autocommands caused command to abort
           (promesa/let [windows (.-windows (:nvim @state))
                         buffer (.-buffer (:nvim @state))
-                        clean (clean?)]
+                        modified (.getOption buffer "modified")]
             (if (->> windows
                      js->clj
                      count
                      (= 2))
-              (if clean
-                (.quit (:nvim @state))
+              (if modified
                 (promesa/do
                   (.errWriteLine (:nvim @state) "E37: No write since last change (add ! and quit again to override)")
                   (.command (:nvim @state) (str "sb " (.-id buffer)))
-                  (request "nvim_win_close" (:hud window) true)))
+                  (request "nvim_win_close" (:hud window) true))
+                (.quit (:nvim @state)))
               (request "nvim_win_close" (:hud window) true))))
       (:hud window)
       (do (setval [ATOM :window] NONE state)
