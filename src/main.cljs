@@ -30,9 +30,9 @@
                                     (js->clj end-sentence)
                                     (.callFunction (:nvim @state) "Get" (clj->js {:offset -1
                                                                                   :pos end-pos})))]
-        (if (= (js->clj start-sentence) (js->clj end-sentence*))
+        (if (= (js->clj start-sentence) end-sentence*)
           [(js->clj start-sentence)]
-          (promesa/loop [sentences [(js->clj end-sentence*)]]
+          (promesa/loop [sentences [end-sentence*]]
             (promesa/let [previous-sentence (.callFunction (:nvim @state) "Get" (clj->js {:offset -1
                                                                                           :pos (drop-last (first sentences))}))]
               (if (= (js->clj start-sentence) (js->clj previous-sentence))
