@@ -2,6 +2,6 @@
 set -e
 FILE="word.tar.gz"
 trap 'rm -f "$FILE"' EXIT
-curl -L https://github.com/8ta4/word/releases/download/v0.1.10/word.tar.gz -o $FILE
-echo "01a9779919ba8000fee4260823a39fdda91e9cc51975fcfce48216b53a68b1b7  $FILE" | shasum -a 256 -c
+curl -L https://github.com/8ta4/word/releases/download/v0.1.11/word.tar.gz -o $FILE
+echo "6e2b6c4a65b42aa619e1880ad553cc928fa1397e788c62a3d5cbdd49b1fb4b2d  $FILE" | shasum -a 256 -c
 tar -xzf $FILE
