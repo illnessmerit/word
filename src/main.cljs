@@ -1,7 +1,8 @@
 (ns main
   (:require [cljs-node-io.core :refer [slurp]]
             [cljs.math :refer [ceil]]
-            [com.rpl.specter :refer [AFTER-ELEM ALL ATOM FIRST LAST MAP-VALS NONE nthpath pred= setval setval* transform]]
+            [clojure.string :refer [escape]]
+            [com.rpl.specter :refer [AFTER-ELEM ALL ATOM FIRST LAST MAP-VALS NONE multi-path must nthpath pred= setval setval* transform]]
             [groq-sdk :refer [Groq]]
             [os :refer [homedir]]
             [path :refer [join]]
@@ -436,6 +437,13 @@
 (def handle-closing
   (comp handle-closing* parse-long))
 
+(defn ormalize-quotes
+  [s]
+  (escape s {\‘ "'"
+             \’ "'"
+             \“ "\""
+             \” "\""}))
+
 (defn handle-result*
   [payload]
   (promesa/let [pending-range-extmark (request "nvim_buf_get_extmark_by_id"
@@ -470,7 +478,9 @@
                      str
                      keyword)
                  (keyword (str resolved-sentence-extmark))]
-                (select-keys payload #{:explanation :pass :suggestions :target-sentence})
+                (transform (multi-path (must :explanation) [:suggestions ALL])
+                           ormalize-quotes
+                           (select-keys payload #{:explanation :pass :suggestions :target-sentence}))
                 state)
         (request "nvim_buf_set_extmark"
                  (:buffer payload)
