@@ -592,6 +592,7 @@
                                :resolved-sentence resolved-sentence-namespace
                                :active-sentence active-sentence-namespace}
                    :nvim (.-nvim plugin)}))
+  (.registerAutocmd plugin "BufEnter" (fn []) (clj->js {:pattern "*"}))
   (.registerAutocmd plugin "CursorMoved" render-hud (clj->js {:pattern "*"
                                                               :sync true}))
   (.registerAutocmd plugin "TextChanged" refresh-highlights (clj->js {:pattern "*"
