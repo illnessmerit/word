@@ -1,5 +1,7 @@
 # word
 
+![](https://raw.githubusercontent.com/8ta4/word-media/2e1a7463c4c4f237633407297dfbf1a064302d12/demo.gif)
+
 ## Her Words, Not Mine
 
 > What's `word`?
