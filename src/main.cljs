@@ -513,7 +513,7 @@
                                                                                           (clj->js {:messages [{:role "system"
                                                                                                                 :content prompt}
                                                                                                                {:role "user"
-                                                                                                                :content (str context)}]
+                                                                                                                :content (js/JSON.stringify context)}]
                                                                                                     :model model
                                                                                                     :response_format response-format
                                                                                                     ;; We set reasoning_effort to "high" because links inside sentences tend to get stripped away otherwise.
