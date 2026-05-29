@@ -436,7 +436,7 @@
 (def handle-closing
   (comp handle-closing* parse-long))
 
-(defn handle*
+(defn handle-result*
   [payload]
   (promesa/let [pending-range-extmark (request "nvim_buf_get_extmark_by_id"
                                                (:buffer payload)
@@ -485,7 +485,7 @@
         (render-hud)))))
 
 (def handle-result
-  (comp handle*
+  (comp handle-result*
         #(js->clj % :keywordize-keys true)
         first))
 
